@@ -8,6 +8,14 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <style>
+      html {
+        height: 100%;
+        background-color: #fafafa;
+        padding: 10px;
+      }
+      h1.page-header {
+        margin-top: 0px;
+      }
       body {
         font-family: 'Roboto', sans-serif;
       }
@@ -16,48 +24,53 @@
     <script type="text/javascript" src="http://cdn.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
     <script type="text/javascript" src="http://cdn.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
     <script>
-      $.get('/get_websocket_url', function(data, status) {
-        var ws_url = data;
-        var ros = new ROSLIB.Ros({
-          url: ws_url
-        });
-        
-        ros.on('connection', function() {
-          console.log('Connected to websocket server.');
-        });
-        
-        ros.on('error', function(error) {
-          console.log('Error connecting to websocket server: ', error);
-        });
-        
-        ros.on('close', function() {
-          console.log('Connection to websocket server closed.');
-        });
-
-        var tts_topic = new ROSLIB.Topic({
-          ros: ros,
-          name: 'say_something/text_to_speech',
-          messageType: 'std_msgs/String'
-        });
-
-        function SaySomethingController(ros, tts_topic) {
-          this.ros = ros;
-          this.tts_topic = tts_topic;
+      var websocketUrl = (function() {
+        var hostname = window.location.hostname;
+        var protocol = 'ws:';
+        if (window.location.protocol == 'https:') {
+          protocol = 'wss:'
         }
-        SaySomethingController.prototype.speak = function(text) {
-          var msg = new ROSLIB.Message({ data: text });
-          this.tts_topic.publish(msg);
-        }
+        return protocol + '//' + hostname + ':9090';
+      })();
 
-        $(document).ready(function() {
-          var speaker = new SaySomethingController(ros, tts_topic);
-          $('#talk_button').click(function() {
-            var text = $('#text_input').val();
-            speaker.speak(text);
-          });
-        });
+      var ros = new ROSLIB.Ros({
+        url: websocketUrl
       });
       
+      ros.on('connection', function() {
+        console.log('Connected to websocket server.');
+      });
+      
+      ros.on('error', function(error) {
+        console.log('Error connecting to websocket server: ', error);
+      });
+      
+      ros.on('close', function() {
+        console.log('Connection to websocket server closed.');
+      });
+
+      var tts_topic = new ROSLIB.Topic({
+        ros: ros,
+        name: 'say_something/text_to_speech',
+        messageType: 'std_msgs/String'
+      });
+
+      function SaySomethingController(ros, tts_topic) {
+        this.ros = ros;
+        this.tts_topic = tts_topic;
+      }
+      SaySomethingController.prototype.speak = function(text) {
+        var msg = new ROSLIB.Message({ data: text });
+        this.tts_topic.publish(msg);
+      }
+
+      $(document).ready(function() {
+        var speaker = new SaySomethingController(ros, tts_topic);
+        $('#talk_button').click(function() {
+          var text = $('#text_input').val();
+          speaker.speak(text);
+        });
+      });
     </script>
       
     <style>
