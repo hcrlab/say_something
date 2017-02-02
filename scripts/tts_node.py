@@ -16,6 +16,7 @@ class Speaker(object):
 def main():
     rospy.init_node('sound_play_tts')
     sound_handle = SoundClient()
+    rospy.sleep(1)
     voice = 'voice_kal_diphone'
     speaker = Speaker(sound_handle, voice)
     rospy.Subscriber('text_to_speech', String, speaker.speak)

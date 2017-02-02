@@ -1,5 +1,3 @@
 <launch>
-  <group ns="say_something">
-    <node name="sound_play_tts" pkg="say_something" type="tts_node.py" />
-  </group>
+  <node name="sound_play_tts" pkg="say_something" type="tts_node.py" />
 </launch>
